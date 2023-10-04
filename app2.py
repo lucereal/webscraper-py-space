@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 api_key = os.environ.get('OPENAI_API_KEY')
+espn_key = os.environ.get('ESPN_KEY')
 
 import re
 from playwright.sync_api import Page, expect, TimeoutError 
@@ -31,7 +32,7 @@ def run(playwright: Playwright) -> None:
 
     # set a default for testing
     user = "lucerodavid1010@gmail.com"
-    pwd = "Fluffy44$"
+    pwd = ""
     url = "https://www.espn.com/fantasy/"
     statsUrl = "https://www.espn.com/nfl/stats"
     
