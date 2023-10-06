@@ -38,51 +38,67 @@ def run(playwright: Playwright) -> None:
     
     page.goto(statsUrl)
     try:
-        #user to select the option from the drop down 
-        #page.get_by_label('Choose a color').select_option('blue')
+        
+        #    page.frame_locator("iframe").locator("div").filter(has_text=re.compile(r"^Email \*$")).click()
+        clocator = page.locator('#fittPageContainer')
+        dlocator = clocator.locator('.dropdown.dropdown--md.mr3.mt2.mb3.filters__seasonDropdown')
+        slocator = dlocator.locator('select.dropdown__select').nth(0)
+        #slocator.select_option(value='2020|3')
+        options = slocator.locator('option').evaluate_all('nodes => nodes.map(n => n.value)')
 
-        x = page.inner_html('.ResponsiveTable')
-        
-        soup = BeautifulSoup(x, "html.parser")
-        tables = soup.findChildren('table')
-        playerTable = tables[0]
-        statsTable = tables[1]
-        
-        players = playerTable.findChildren(['tr'])
-        
-        # foo = players[1].get('data-idx')
-        # print(foo)
-        player_dict = {}
-        # - get players from first table
-        for player in players[1:]:
-            pIndex = player.get('data-idx')
-            pd = player.findChildren('td')
-            pRank = pd[0].text
-            pName = pd[1].findChildren('a')[0].text
-            pTeam = pd[1].findChildren('span')[0].text
-            player_dict[pIndex] = [pRank,pName,pTeam]
-       
-        
-        # - get stats for each player from second table
-        stats = statsTable.findChildren('tr')
-        for stat in stats[1:]:          
-            sIndex = stat.get('data-idx')          
-            sdi = [i.text for i in stat.findChildren('td')]
-            for sdix in sdi:
-                player_dict[sIndex].append(sdix)
-
-        
+        all_data = []
+        pageIndex = 0
+        for option_value in options:
+                    # Set the dropdown value
+            slocator.select_option(value=option_value)
             
-            #data-idx="0"
-        # player1Data = players[1].findChildren(['td'])
-        # player1Rank = player1Data[0].text
-        # player1Name = player1Data[1].findChildren(['a'])[0].text
-        # player1Team = player1Data[1].findChildren(['span'])[0].text
-        # print(player1Rank)
-        # print(player1Name)
-        # print(player1Team)
-    
+            # Wait for the page to load its content after selecting an option (adjust timeout as needed)
+            page.wait_for_timeout(2000)  # Waiting for 2 seconds as an example
+            
+            x = page.inner_html('.ResponsiveTable')
+            soup = BeautifulSoup(x, "html.parser")
+            all_data.append(soup)
+            # Get the page content
+            # content = page.content()
+            
+            if pageIndex > 2: break
+            pageIndex+=1
+            
+            # Use BeautifulSoup to parse and scrape data
+            # soup = BeautifulSoup(content, 'html.parser')
+            # # Extract data here based on your scraping logic. As an example, I'm just storing the page title:
+            # all_data.append(soup.title.string)
+       
+        x1 = all_data[0]
+        # x = page.inner_html('.ResponsiveTable')
+        # soup = BeautifulSoup(x, "html.parser")
+        # tables = soup.findChildren('table')
+        # playerTable = tables[0]
+        # statsTable = tables[1]
         
+        # player_dict = {}
+        
+        # # - get players from first table
+        # players = playerTable.findChildren(['tr'])
+        # for player in players[1:]:
+        #     pIndex = player.get('data-idx')
+        #     pd = player.findChildren('td')
+        #     pRank = pd[0].text
+        #     pName = pd[1].findChildren('a')[0].text
+        #     pTeam = pd[1].findChildren('span')[0].text
+        #     player_dict[pIndex] = [pRank,pName,pTeam]
+            
+        # # - get stats for each player from second table
+        # stats = statsTable.findChildren('tr')
+        # for stat in stats[1:]:          
+        #     sIndex = stat.get('data-idx')          
+        #     sdi = [i.text for i in stat.findChildren('td')]
+        #     for sdix in sdi:
+        #         player_dict[sIndex].append(sdix)
+
+        # print(player_dict['0'])
+        
+    
     except Exception as error:
         print("An exception occurred:", error) # An exception occurred: division by zero
         
@@ -121,3 +137,14 @@ with sync_playwright() as playwright:
 # expect(page.get_by_role("heading", name="Sign up")).to_be_visible()
 
 # page.get_by_role("checkbox", name="Subscribe").check()
+
+
+#
+# values = [
+#     "2023|2", "2022|3", "2022|2", "2021|3", "2021|2", "2020|3", "2020|2", 
+#     "2019|3", "2019|2", "2018|3", "2018|2", "2017|3", "2017|2", "2016|3", 
+#     "2016|2", "2015|3", "2015|2", "2014|3", "2014|2", "2013|3", "2013|2", 
+#     "2012|3", "2012|2", "2011|3", "2011|2", "2010|3", "2010|2", "2009|3", 
+#     "2009|2", "2008|3", "2008|2", "2007|3", "2007|2", "2006|3", "2006|2", 
+#     "2005|3", "2005|2", "2004|3", "2004|2"
+# ]
