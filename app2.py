@@ -54,14 +54,28 @@ def run(playwright: Playwright) -> None:
             
             # Wait for the page to load its content after selecting an option (adjust timeout as needed)
             page.wait_for_timeout(2000)  # Waiting for 2 seconds as an example
-            
-            x = page.inner_html('.ResponsiveTable')
-            soup = BeautifulSoup(x, "html.parser")
-            all_data.append(soup)
+                       
+            showMoreCount = 0
+            while True:
+                if page.is_visible('.AnchorLink.loadMore__link'):                   
+                    showMore = page.locator('.AnchorLink.loadMore__link')
+                    showMore.click()
+                    page.wait_for_timeout(1000)
+                    
+                    showMoreCount += 1
+                    if showMoreCount > 1:
+                        break
+                else:
+                    break
+   
+            x = page.inner_html('.ResponsiveTable')    
+            all_data.append(x)
             # Get the page content
             # content = page.content()
             
-            if pageIndex > 2: break
+            
+            if pageIndex > 2: 
+                break
             pageIndex+=1
             
             # Use BeautifulSoup to parse and scrape data
@@ -69,36 +83,36 @@ def run(playwright: Playwright) -> None:
             # # Extract data here based on your scraping logic. As an example, I'm just storing the page title:
             # all_data.append(soup.title.string)
        
-        x1 = all_data[0]
+        
         # x = page.inner_html('.ResponsiveTable')
         # soup = BeautifulSoup(x, "html.parser")
-        # tables = soup.findChildren('table')
-        # playerTable = tables[0]
-        # statsTable = tables[1]
         
-        # player_dict = {}
-        
-        # # - get players from first table
-        # players = playerTable.findChildren(['tr'])
-        # for player in players[1:]:
-        #     pIndex = player.get('data-idx')
-        #     pd = player.findChildren('td')
-        #     pRank = pd[0].text
-        #     pName = pd[1].findChildren('a')[0].text
-        #     pTeam = pd[1].findChildren('span')[0].text
-        #     player_dict[pIndex] = [pRank,pName,pTeam]
+        for x in all_data:
+            soup = BeautifulSoup(x, "html.parser")
+            tables = soup.findChildren('table')
+            playerTable = tables[0]
+            statsTable = tables[1]
             
-        # # - get stats for each player from second table
-        # stats = statsTable.findChildren('tr')
-        # for stat in stats[1:]:          
-        #     sIndex = stat.get('data-idx')          
-        #     sdi = [i.text for i in stat.findChildren('td')]
-        #     for sdix in sdi:
-        #         player_dict[sIndex].append(sdix)
-
-        # print(player_dict['0'])
+            player_dict = {}
         
-    
+            # - get players from first table
+            players = playerTable.findChildren(['tr'])
+            for player in players[1:]:
+                pIndex = player.get('data-idx')
+                pd = player.findChildren('td')
+                pRank = pd[0].text
+                pName = pd[1].findChildren('a')[0].text
+                pTeam = pd[1].findChildren('span')[0].text
+                player_dict[pIndex] = [pRank,pName,pTeam]
+                
+            # - get stats for each player from second table
+            stats = statsTable.findChildren('tr')
+            for stat in stats[1:]:          
+                sIndex = stat.get('data-idx')          
+                sdi = [i.text for i in stat.findChildren('td')]
+                for sdix in sdi:
+                    player_dict[sIndex].append(sdix)
+         
     except Exception as error:
         print("An exception occurred:", error) # An exception occurred: division by zero
         
